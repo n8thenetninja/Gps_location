@@ -31,6 +31,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import org.w3c.dom.Text;
@@ -44,7 +45,9 @@ public class MainActivity extends AppCompatActivity {
     private TextView prev;
     private LocationManager locationManager;
     private LocationListener listener;
-    float dist = 0;
+    private EditText kTextBox;
+    double dist = 0;
+    int k = 5000;
     boolean enable = false;
     final ArrayList <Location> locationList = new ArrayList();
 
@@ -57,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
         t = (TextView) findViewById(R.id.textView);
         b = (Button) findViewById(R.id.button);
         prev = (TextView) findViewById(R.id.prevDist);
+        kTextBox = (EditText) findViewById(R.id.kTextBox);
 
 
 
@@ -77,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
                     //t.append("\n " + location.getLongitude() + " " + location.getLatitude());
                     dist += location.distanceTo(locationList.get(locationList.size()-1));
                     locationList.add(location);
-                    t.setText(Float.toString(dist));
+                    t.setText(Double.toString((dist*0.000621371)) + " Miles");
                 }
                 else {
                     locationList.clear();
@@ -133,16 +137,17 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 //noinspection MissingPermission
-                locationManager.requestLocationUpdates("gps", 5000, 0, listener);
+                locationManager.requestLocationUpdates("gps", k, 0, listener);
                 enable = !enable;
                 if (enable == true) {
                     b.setText("Disable");
-                    t.setText(Float.toString(dist));
+                    t.setText(Double.toString(dist));
+                    k = Integer.parseInt(kTextBox.getText().toString());
 
                 }
                 else {
                     b.setText("Enable");
-                    prev.append("Route calculated: " + Float.toString(dist));
+                    prev.append("Route calculated: " + Double.toString(dist*0.000621371) + " Miles\n");
                     dist = 0;
                     t.setText("Press Enable to start");
 

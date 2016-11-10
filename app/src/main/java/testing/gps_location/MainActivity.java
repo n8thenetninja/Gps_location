@@ -1,3 +1,19 @@
+/*
+*
+* Project forked from github user <user>.
+* Original program queried for GPS coordinates and appended TextView.
+*
+* Modified to keep track of locations within a set resolution, calculate distance
+* between each point, and show total distance in TextView
+*
+* The purpose of this app is to perform experiments defined in the project assigned
+* by Dr Aaron Gordon for Mobile Devices Programming class at MSU Denver
+*
+* Date: 11/04/2016
+* Author: Nathan Larson
+*
+* */
+
 package testing.gps_location;
 
 import android.Manifest;
@@ -17,13 +33,20 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import org.w3c.dom.Text;
+
+import java.util.ArrayList;
+
 public class MainActivity extends AppCompatActivity {
 
     private Button b;
     private TextView t;
+    private TextView prev;
     private LocationManager locationManager;
     private LocationListener listener;
-
+    float dist = 0;
+    boolean enable = false;
+    final ArrayList <Location> locationList = new ArrayList();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -33,6 +56,10 @@ public class MainActivity extends AppCompatActivity {
 
         t = (TextView) findViewById(R.id.textView);
         b = (Button) findViewById(R.id.button);
+        prev = (TextView) findViewById(R.id.prevDist);
+
+
+
 
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
@@ -40,7 +67,24 @@ public class MainActivity extends AppCompatActivity {
         listener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
-                t.append("\n " + location.getLongitude() + " " + location.getLatitude());
+
+
+                if (enable == true) {
+                    if (locationList.size() == 0) {
+                        locationList.add(location);
+
+                    }
+                    //t.append("\n " + location.getLongitude() + " " + location.getLatitude());
+                    dist += location.distanceTo(locationList.get(locationList.size()-1));
+                    locationList.add(location);
+                    t.setText(Float.toString(dist));
+                }
+                else {
+                    locationList.clear();
+
+
+                }
+
             }
 
             @Override
@@ -90,6 +134,19 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 //noinspection MissingPermission
                 locationManager.requestLocationUpdates("gps", 5000, 0, listener);
+                enable = !enable;
+                if (enable == true) {
+                    b.setText("Disable");
+                    t.setText(Float.toString(dist));
+
+                }
+                else {
+                    b.setText("Enable");
+                    prev.append("Route calculated: " + Float.toString(dist));
+                    dist = 0;
+                    t.setText("Press Enable to start");
+
+                }
             }
         });
     }
